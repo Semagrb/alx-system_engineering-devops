@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# Configures an Nginx server for redirection and custom error handling.
+# The server redirects /redirect_me to another page with a "301 Moved Permanently" response.
+# Additionally, a custom 404 page containing "Ceci n'est pas une page" is included.
+
+# Updates the package lists to get information on the newest versions of packages and their dependencies.
+apt-get update
+
+# Installs the Nginx web server.
+apt-get install -y nginx
+
+# Creates the /etc/nginx/html directory, serving as the document root directory for Nginx.
+mkdir /etc/nginx/html
+
+# Creates an empty index.html file inside the /etc/nginx/html directory.
+touch /etc/nginx/html/index.html
+
+# Sets the content of the index.html file to "Hello World!" using the echo command.
+echo "Hello World!" > /etc/nginx/html/index.html
+
+# Configures Nginx to listen on port 80 and serve files from the /etc/nginx/html directory.
+printf %s "server {
+     listen      80 default_server;
+     listen      [::]:80 default_server;
+     root        /etc/nginx/html;
+     index       index.html index.htm;
+}
+" > /etc/nginx/sites-available/default
+
+# Creates an empty file named 404.html inside the /etc/nginx/html directory.
+touch /etc/nginx/html/404.html
+
+# Pastes a custom 404 response in the 404.html file.
+echo "Ceci n'est pas une page" | sudo tee /etc/nginx/html/404.html
+
+# Displays a completion message for the script.
+echo "Nginx installation and configuration completed."
+
+# Creates a configuration file for the redirection and custom error handling.
+echo "server {
+    listen      80;
+    listen      [::]:80;
+    root        /etc/nginx/html;
+    index       index.html index.htm;
+
+    # Add index.php to the list if you are using PHP
+    index index.html index.htm index.nginx-debian.html;
+
+    # Configures redirection for the /redirect_me path.
+    location /redirect_me {
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+    }
+
+    # Configures custom error handling for 404 responses.
+    error_page 404 /404.html;
+    location /404 {
+      root /etc/nginx/html;
+      internal;
+    }
+
+}" | sudo tee /etc/nginx/sites-available/default
+
+# Enables the new site configuration by creating a symbolic link in the sites-enabled directory.
+sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
+
+# Tests Nginx configuration and reloads the service to apply changes.
+sudo nginx -t
+sudo service nginx reload
