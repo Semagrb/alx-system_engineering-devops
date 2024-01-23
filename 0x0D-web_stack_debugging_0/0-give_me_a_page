@@ -1,26 +1,4 @@
 #!/usr/bin/env bash
-# This script configures an Nginx server to listen on port 80.
+#start apache2 inside docker
 
-# Remove the default Nginx configuration symlink from the sites-enabled directory.
-rm /etc/nginx/sites-enabled/default
-
-# Create a symbolic link from the available Nginx configuration to the sites-enabled directory.
-ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
-
-# Restart the Nginx service to apply the configuration changes.
-service nginx restart
-
-
-
-
-#!/usr/bin/env bash
-# This script configures an Nginx server to listen on port 80.
-
-# Create a symbolic link from the available Nginx configuration to the sites-enabled directory.
-ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
-
-# Start the Nginx service to apply the configuration changes.
-service nginx start
-
-# Kill the first Nginx process to ensure a fresh start.
-kill "$(pgrep 'nginx' | head -1)"
+service apache2 start 
