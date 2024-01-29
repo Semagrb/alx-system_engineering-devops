@@ -1,31 +1,29 @@
 #!/usr/bin/env bash
 
-# Disable shellcheck warning for an unused variable
-# that will be used later in the script
-# shellcheck disable=SC2154
-
-# Update package information and install Nginx
+# Update package information
 sudo apt-get update
+
+# Install NGINX
 sudo apt-get install nginx -y
 
-# Allow incoming HTTP traffic through UFW for Nginx
+# Allow incoming HTTP traffic through UFW for NGINX
 sudo ufw allow 'Nginx HTTP'
 
-# Set the default content for the Nginx default page
+# Set default content for NGINX default page
 echo "Holberton School" | sudo tee /var/www/html/index.nginx-debian.html
 
-# Configure Nginx to redirect requests to a specific URL
+# Configure NGINX to redirect requests to a specific URL
 redirect_config="listen 80 default_server;\\n\\tlocation \/redirect_me {\\n\\t\\treturn 301 https:\/\/www.youtube.com\/;\\n\\t}"
 sudo sed -i "s/listen 80 default_server;/$redirect_config/" /etc/nginx/sites-enabled/default
 
-# Create a custom 404 error page and configure Nginx to use it
+# Create a custom 404 error page and configure NGINX to use it
 echo "Ceci n'est pas une page" | sudo tee /usr/share/nginx/html/404.html
 error_config="listen 80 default_server;\\nerror_page 404 \/404.html;\\n\\tlocation = \/404.html {\\n\\t\\troot \/usr\/share\/nginx\/html;\\n\\t\\tinternal;\\n\\t}"
 sudo sed -i "s/listen 80 default_server;/$error_config/" /etc/nginx/sites-enabled/default
 
-# Add a custom header to Nginx configuration indicating the server's hostname
+# Add a custom header to NGINX configuration indicating the server's hostname
 header_config="http {\\n\\tadd_header X-Served-By \"$HOSTNAME\";"
 sudo sed -i "s/http {/$header_config/" /etc/nginx/nginx.conf
 
-# Start the Nginx service
+# Start NGINX service
 sudo service nginx start
