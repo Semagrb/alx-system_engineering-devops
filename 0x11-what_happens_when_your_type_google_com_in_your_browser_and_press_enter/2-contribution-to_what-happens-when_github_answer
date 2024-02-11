@@ -1,0 +1,104 @@
+What Happens When...?
+This repository aims to comprehensively answer the timeless interview question: "What happens when you type google.com into your browser's address box and press enter?" Instead of a brief overview, we delve into each step in detail, leaving no aspect unexplored.
+
+This is a collaborative project, inviting contributions from anyone willing to dive into the intricacies of web browsing. There's plenty of room for additional details and insights, so feel free to submit pull requests!
+
+All content in this repository is licensed under the terms of the Creative Commons Zero license.
+
+Table of Contents
+The "g" key is pressed
+The "enter" key bottoms out
+Interrupt fires [NOT for USB keyboards]
+On Windows: A WM_KEYDOWN message is sent to the app
+On OS X: A KeyDown NSEvent is sent to the app
+On GNU/Linux: the Xorg server listens for keycodes
+Parse URL
+Is it a URL or a search term?
+Convert non-ASCII Unicode characters in the hostname
+Check HSTS list
+DNS lookup
+ARP process
+Opening of a socket
+TLS handshake
+If a packet is dropped
+HTTP protocol
+HTTP Server Request Handle
+Behind the scenes of the Browser
+Browser
+HTML parsing
+CSS interpretation
+Page Rendering
+GPU Rendering
+Window Server
+Post-rendering and user-induced execution
+The "g" key is pressed
+This section details the physical and OS-related actions when the "g" key is pressed, initiating the browsing process. Auto-complete functionalities in the browser are triggered, offering suggestions based on browsing history, bookmarks, and popular searches. Various algorithms prioritize and refine these suggestions with each keypress.
+
+The "enter" key bottoms out
+Upon pressing the "enter" key, an electrical circuit specific to the enter key is closed, allowing a small current to flow into the keyboard's logic circuitry. The keyboard controller scans the state of each key switch, debounces the electrical noise, and converts it to a keycode integer. This keycode is then sent to the computer, typically via USB or Bluetooth connection.
+
+Interrupt fires [NOT for USB keyboards]
+The keyboard sends signals on its interrupt request line (IRQ), mapped to an interrupt vector by the interrupt controller. The CPU uses the Interrupt Descriptor Table (IDT) to run the appropriate handler supplied by the kernel.
+
+On Windows: A WM_KEYDOWN message is sent to the app
+The HID transport passes the key down event to the KBDHID.sys driver, converting the HID usage into a scancode. The message is then processed in kernel mode, determining the active window and sending a WM_KEYDOWN message accordingly.
+
+On OS X: A KeyDown NSEvent is sent to the app
+The I/O Kit kext keyboard driver translates the signal into a keycode, passed to the OS X WindowServer process. An event is dispatched to appropriate applications through their Mach port, eventually handled by an NSApplication main event loop.
+
+On GNU/Linux: the Xorg server listens for keycodes
+When using X, the X server listens for keypresses. Keycodes are remapped with X server-specific keymaps and rules. The focused window receives the character through the graphical API, printing the appropriate symbol in the focused field.
+
+Parse URL
+The browser parses the URL, extracting information such as the protocol, hostname, and resource. This determines whether it's a URL or a search term, facilitating further processing.
+
+Is it a URL or a search term?
+If no protocol or valid domain name is given, the browser feeds the text to the default web search engine, appending a special piece of text indicating the source. Non-ASCII Unicode characters in the hostname are converted using Punycode encoding.
+
+Convert non-ASCII Unicode characters in the hostname
+The browser checks the hostname for non-ASCII characters, applying Punycode encoding if necessary.
+
+Check HSTS list
+The browser checks its "preloaded HSTS" list, ensuring websites are contacted via HTTPS only if listed. Otherwise, the initial request is sent via HTTP.
+
+DNS lookup
+The browser checks its cache for the domain. If not found, it performs a DNS lookup, first checking the local hosts file before querying the DNS server configured in the network stack.
+
+ARP process
+To send an ARP broadcast, the network stack library needs the target IP address and MAC address of the interface. The process varies depending on hardware, involving routers, hubs, or switches.
+
+Opening of a socket
+The browser requests a TCP socket stream, crafting a TCP segment and IP packet. The packet traverses the network, passing through routers and modems, reaching the destination server.
+
+TLS handshake
+The client initiates a TLS handshake with the server, negotiating parameters and exchanging certificates. Upon agreement, the session proceeds to transmit encrypted data.
+
+If a packet is dropped
+TCP congestion control algorithms manage dropped packets, adjusting window sizes and retransmitting as necessary.
+
+HTTP protocol
+The browser sends an HTTP request to the server, fetching resources and handling responses. It may negotiate upgrades or handle caching mechanisms.
+
+HTTP Server Request Handle
+The HTTP server processes the request, verifying methods, rules, and permissions before fetching and parsing the requested content.
+
+Behind the scenes of the Browser
+This section outlines the browser's components and functionality, including user interface elements, rendering engine, networking, JavaScript execution, and data storage.
+
+HTML parsing
+The rendering engine parses HTML markup into a parse tree, constructing the Document Object Model (DOM). The forgiving nature of HTML requires a custom parsing algorithm.
+
+CSS interpretation
+CSS files are parsed, and style attributes are computed, creating a StyleSheet object. Various parsers handle top-down or bottom-up parsing methods.
+
+Page Rendering
+The browser constructs a render tree, calculates element dimensions, and allocates layers for rendering. Graphics processing may involve CPU or GPU computations.
+
+GPU Rendering
+Graphical computations may utilize the GPU for parallel processing, splitting tasks into multiple pieces for efficient rendering.
+
+Window Server
+The window server handles post-rendering tasks, managing composite commands and final layer positions before displaying the rendered content.
+
+Post-rendering and user-induced execution
+Upon rendering completion, the browser executes JavaScript and plugins, potentially triggering additional network requests or modifying the page layout.
