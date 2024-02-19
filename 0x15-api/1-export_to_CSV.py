@@ -6,45 +6,47 @@ import requests
 import sys
 
 
-def fetch_user_data(user_id):
-    """Fetches user data from the API and returns it as a dictionary."""
-    url = "https://jsonplaceholder.typicode.com/users/{}".format(user_id)
-    response = requests.get(url)
-    return response.json()
+def fetch_user_data(user_id, url):
+    """Fetch user information and to-do list for a given employee ID."""
+    # Get the employee information using the provided employee ID
+    user_url = url + "users/{}".format(user_id)
+    user_response = requests.get(user_url)
+    user = user_response.json()
+
+    # Get the to-do list for the employee using the provided employee ID
+    todo_params = {"userId": user_id}
+    todo_url = url + "todos"
+    todo_response = requests.get(todo_url, params=todo_params)
+    todos = todo_response.json()
+
+    return user, todos
 
 
-def fetch_todos(user_id):
-    """Fetches to-do list items for a given user ID from the API and returns them as a list."""
-    url = "https://jsonplaceholder.typicode.com/todos"
-    response = requests.get(url, params={"userId": user_id})
-    return response.json()
-
-
-def write_todos_to_csv(user_id, username, todos):
-    """Writes the given to-do list items to a CSV file."""
-    with open("{}.csv".format(user_id), "w", newline="") as csvfile:
-        writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
-        for todo in todos:
-            writer.writerow([user_id, username, todo.get("completed"), todo.get("title")])
-
-
-def main():
-    """Main function of the script."""
-    # Get the user ID from the command-line arguments provided to the script
-    user_id = sys.argv[1]
-
-    # Fetch user information from the API
-    user_data = fetch_user_data(user_id)
-
-    # Extract the username from the user data
-    username = user_data.get("username")
-
-    # Fetch the to-do list items associated with the given user ID
-    todos = fetch_todos(user_id)
-
-    # Write each item's details (user ID, username, completion status, and title) as a row in the CSV file
-    write_todos_to_csv(user_id, username, todos)
+def write_to_csv(user_id, username, todos, csvfile):
+    """Write to-do list information to a CSV file."""
+    # Use list comprehension to iterate over the to-do list items
+    # Write each item's details (user ID, username, completion status,
+    #   and title) as a row in the CSV file
+    writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
+    [writer.writerow(
+            [user_id, username, t.get("completed"), t.get("title")]
+         ) for t in todos]
 
 
 if __name__ == "__main__":
-    main()
+    # Get the employee ID from the command-line arguments provided to the script
+    user_id = sys.argv[1]
+
+    # Define the base URL for the JSON API
+    url = "https://jsonplaceholder.typicode.com/"
+
+    # Fetch the user data and to-do list information
+    user, todos = fetch_user_data(user_id, url)
+
+    # Extract the username from the user data
+    username = user.get("username")
+
+    # Create a CSV file with the employee ID as the filename
+    with open("{}.csv".format(user_id), "w", newline="") as csvfile:
+        # Write the to-do list information to the CSV file
+        write_to_csv(user_id, username, todos, csvfile)
