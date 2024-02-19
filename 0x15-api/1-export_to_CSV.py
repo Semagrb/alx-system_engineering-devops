@@ -13,23 +13,22 @@ if __name__ == "__main__":
     # Define the base URL for the JSON API
     url = "https://jsonplaceholder.typicode.com/"
 
-    # Fetch user information from the API and convert the response to a JSON object
-    user_response = requests.get(url + "users/{}".format(user_id))
-    user = user_response.json()
+    # Fetch user information from the API and
+    #   convert the response to a JSON object
+    user = requests.get(url + "users/{}".format(user_id)).json()
 
     # Extract the username from the user data
     username = user.get("username")
 
-    # Fetch the to-do list items associated with the given user ID and convert the response to a JSON object
-    params = {"userId": user_id}
-    todos_response = requests.get(url + "todos", params=params)
-    todos = todos_response.json()
+    # Fetch the to-do list items associated with the
+    #   given user ID and convert the response to a JSON object
+    todos = requests.get(url + "todos", params={"userId": user_id}).json()
 
-    # Write to-do list information to a CSV file
+    # Use list comprehension to iterate over the to-do list items
+    # Write each item's details (user ID, username, completion status,
+    #   and title) as a row in the CSV file
     with open("{}.csv".format(user_id), "w", newline="") as csvfile:
         writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
-
-        # Iterate over the to-do list items and write each item's details as a row in the CSV file
-        for todo in todos:
-            row = [user_id, username, todo.get("completed"), todo.get("title")]
-            writer.writerow(row) 
+        [writer.writerow(
+            [user_id, username, t.get("completed"), t.get("title")]
+         ) for t in todos]
