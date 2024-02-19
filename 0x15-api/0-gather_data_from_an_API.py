@@ -1,47 +1,61 @@
 #!/usr/bin/python3
 """
-Retrieves and displays the to-do list information for a given employee ID.
+Returns to-do list information for a given employee ID.
 
-Usage: python3 todo_list.py <employee_id>
+This script takes an employee ID as a command-line argument and fetches
+the corresponding user information and to-do list from the JSONPlaceholder API.
+It then prints the tasks completed by the employee.
 """
 
 import requests
 import sys
 
 
-def fetch_user_info(employee_id):
-    """Fetches user information from the JSONPlaceholder API."""
+def fetch_user_data(employee_id):
+    """Fetch user information and to-do list for a given employee ID."""
+    # Base URL for the JSONPlaceholder API
     base_url = "https://jsonplaceholder.typicode.com/"
-    response = requests.get(base_url + "users/{}".format(employee_id))
-    return response.json()
+
+    # Get the employee information using the provided employee ID
+    user_url = base_url + "users/{}".format(employee_id)
+    user_response = requests.get(user_url)
+    user = user_response.json()
+
+    # Get the to-do list for the employee using the provided employee ID
+    todo_params = {"userId": employee_id}
+    todo_url = base_url + "todos"
+    todo_response = requests.get(todo_url, params=todo_params)
+    todos = todo_response.json()
+
+    return user, todos
 
 
-def fetch_todo_list(employee_id):
-    """Fetches the to-do list for the given employee ID from the JSONPlaceholder API."""
-    base_url = "https://jsonplaceholder.typicode.com/"
-    params = {"userId": employee_id}
-    response = requests.get(base_url + "todos", params=params)
-    return response.json()
+def get_completed_tasks(todos):
+    """Filter completed tasks from a given to-do list."""
+    completed = [t.get("title") for t in todos if t.get("completed") is True]
+
+    return completed
+
+
+def print_completed_tasks(completed):
+    """Print completed tasks with indentation."""
+    for complete in completed:
+        print("\t", complete)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python3 todo_list.py <employee_id>")
-        sys.exit(1)
-
+    # Get the employee ID from the command-line argument
     employee_id = sys.argv[1]
 
-    try:
-        user_info = fetch_user_info(employee_id)
-        todo_list = fetch_todo_list(employee_id)
+    # Fetch the user data and to-do list information
+    user, todos = fetch_user_data(employee_id)
 
-        completed_tasks = [task["title"] for task in todo_list if task["completed"]]
+    # Filter completed tasks and count them
+    completed = get_completed_tasks(todos)
 
-        print("Employee {} has completed {}/{} tasks:".format(user_info["name"], len(completed_tasks), len(todo_list)))
+    # Print the employee's name and the number of completed tasks
+    print("Employee {} is done with tasks({}/{}):".format(
+        user.get("name"), len(completed), len(todos)))
 
-        for task in completed_tasks:
-            print("\t", task)
-
-    except requests.exceptions.RequestException as e:
-        print("Error fetching data:", e)
-        sys.exit(1)
+    # Print the completed tasks one by one with indentation
+    print_completed_tasks(completed)
