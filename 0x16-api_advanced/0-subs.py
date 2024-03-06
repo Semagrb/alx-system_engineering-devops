@@ -1,21 +1,31 @@
 #!/usr/bin/python3
-""" Exporting csv files"""
-import json
-import requests
-import sys
 
+"""
+Script that queries subscribers on a given Reddit subreddit.
+"""
+
+import requests
 
 def number_of_subscribers(subreddit):
-    """Read reddit API and return number subscribers """
-    username = 'ledbag123'
-    password = 'Reddit72'
-    user_pass_dict = {'user': username, 'passwd': password, 'api_type': 'json'}
-    headers = {'user-agent': '/u/ledbag123 API Python for Holberton School'}
-    url = 'https://www.reddit.com/r/{}/about.json'.format(subreddit)
-    client = requests.session()
-    client.headers = headers
-    r = client.get(url, allow_redirects=False)
-    if r.status_code == 200:
-        return (r.json()["data"]["subscribers"])
-    else:
-        return(0)
+    """
+    Queries the Reddit API and returns the number of subscribers for a given subreddit.
+    If not a valid subreddit, returns 0.
+    """
+    url = f'https://www.reddit.com/r/{subreddit}/about.json'
+    headers = {'User-Agent': 'my-reddit-api-client'}
+    
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        
+        data = response.json()
+        
+        if data['kind'] == 't5':
+            return data['data']['subscribers']
+        else:
+            return 0
+    except requests.exceptions.HTTPError as err:
+        if response.status_code == 404:
+            return 0
+        else:
+            raise err
