@@ -15,17 +15,14 @@ def number_of_subscribers(subreddit):
     headers = {'User-Agent': 'my-reddit-api-client'}
     
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=5)
         response.raise_for_status()
         
         data = response.json()
         
-        if data['kind'] == 't5':
-            return data['data']['subscribers']
+        if data.get('kind') == 't5':
+            return data['data'].get('subscribers', 0)
         else:
             return 0
-    except requests.exceptions.HTTPError as err:
-        if response.status_code == 404:
-            return 0
-        else:
-            raise err
+    except (requests.exceptions.HTTPError, requests.exceptions.Timeout) as err:
+        return 0
