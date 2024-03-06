@@ -20,9 +20,22 @@ def number_of_subscribers(subreddit):
         
         data = response.json()
         
-        if data.get('kind') == 't5':
-            return data['data'].get('subscribers', 0)
-        else:
+        # Check 5: Ensure the response is of the correct type (a dictionary)
+        if not isinstance(data, dict):
             return 0
+        
+        # Check 6: Ensure the 'kind' key exists in the response dictionary
+        if 'kind' not in data:
+            return 0
+        
+        # Check 7: Ensure the 'data' key exists in the response dictionary and is a dictionary itself
+        if 'data' not in data or not isinstance(data['data'], dict):
+            return 0
+        
+        # Check 8: Ensure the 'subscribers' key exists in the 'data' dictionary and is an integer
+        if 'subscribers' not in data['data'] or not isinstance(data['data']['subscribers'], int):
+            return 0
+        
+        return data['data']['subscribers']
     except (requests.exceptions.HTTPError, requests.exceptions.Timeout) as err:
         return 0
